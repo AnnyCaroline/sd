@@ -24,32 +24,29 @@ public class Worker extends Thread
       System.out.println("   " + color + "Worker - nova thread iniciando ..." + ANSI_RESET);
 
       try {
-         // obtem os fluxos que fazem parte do Socket TCP
-         // e "encapsula" os mesmos em fluxos de objeto
 
-         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+         DataInputStream in=new DataInputStream(socket.getInputStream());  
+         DataOutputStream out=new DataOutputStream(socket.getOutputStream());
 
-         for (int i=0; i<iterations; i++){
-            // Agora eh facil: le o objeto, calsse Object, do fluxo de entrada 
-            // ... e faz o casting para a classe Struct. Depois exibe o conteudo.
-            // esse eh o "processamento da requisicao"
-            Struct str = (Struct) in.readObject ();
-            System.out.println("");
-            System.out.println("   " + color + "Mensagem recebida de " + socket.getRemoteSocketAddress().toString() + ANSI_RESET);
-            System.out.println("   " + color + str + ANSI_RESET);
+         for (int k=1, j=0; j<=16; j++, k=k*2){
 
-            // Agora, a resposta. Monta uma string e simplesmente joga o objeto
-            // no fluxo de saida de objetos ... vai direto para o "outro lado"
-            // ... ou seja, para o cliente, que esta conectado
-            //out.writeObject("Recebido Ok!" + new java.util.Date().toString());
-            //ToDo: Substituir por um echo
-            out.writeObject(str);
+            for (int i=0; i<iterations; i++){
+               byte[] data  = new byte[k];
+               int count = in.read(data);
+               
+               byte[] real = new byte[count+1];
+               for(int ii=0;ii<count;ii++)
+                  real[ii]=data[ii];
+
+               System.out.println("\n   " + color +k+"-"+j+"-"+i+"Mensagem recebida"+ ANSI_RESET);
+
+               out.write(data);
+               out.flush();
+            }
          }
 
-         // fecha o socket e acabou o servico
-         // se precisar de muitas interacoes, tem que fazer um loop...
-         socket.close();
+         Thread.currentThread().sleep(1000);
+         this.socket.close();
       }
       catch (Exception e) {
          System.out.println("   " + color + e + ANSI_RESET);

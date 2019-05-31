@@ -3,43 +3,75 @@ import java.net.*;
 
 public class TCPClient
 {
-   // ToDo: tratar excecoes
    public static void main(String args[]) throws Exception{
-      String host = args[0];
-      int port = Integer.parseInt(args[1]);
-      String stringParm = args[2];
-      int iterations = Integer.parseInt(args[3]); //args[3]: numero de iteracoes
- 
-      // verificar se apenas passando a String do host o
-      // socket consegue resolver o nome o se precisamos de
-      // InetAddress IPAddress = InetAddress.getByName(args[0]);
-      // e passar o objeto da classe InetAddress... 
-      Socket sock = new Socket(host, port); // cria socket
+
+      String host=host = args[0];
+      int port=port = Integer.parseInt(args[1]);
+      int iterations=iterations = Integer.parseInt(args[2]);
+
+      Socket socket = new Socket(host, port);
       
-      // pega os fluxos out e in do socket TCP e encapusla em
-      // ... fluxos de objeto
-      ObjectOutputStream out = new ObjectOutputStream (sock.getOutputStream()); 
-      ObjectInputStream in = new ObjectInputStream(sock.getInputStream());      
+      DataInputStream in=new DataInputStream(socket.getInputStream());  
+      DataOutputStream out=new DataOutputStream(socket.getOutputStream());
 
-      for (int i=0; i<iterations; i++){
-         // cria a estrutura de dados a ser enviada         
-         Struct str = new Struct(stringParm); 
+      String l1 = String.format("%-12s ", "TCP/2/100");
+      for (int k=1, j=0; j<=16; j++, k=k*2){
+         l1 = l1 + String.format("%-12d ", k);
+      }
+      String lMed = String.format("%-12s ", "MED");
+      String lDvp = String.format("%-12s ", "DVP");
 
-         //ToDo: salvar o momento em que foi enviado
-         long time = System.currentTimeMillis();
+      for (int k=1, j=0; j<=16; j++, k=k*2){
          
-         // envia objeto para o servidor (Worker)
-         out.writeObject(str); 
+         long rtt[] = new long[iterations];
+         double media = 0;
+		   double desvioPadrao = 0;
 
-         Struct resp = (Struct)in.readObject(); // recebe objeto de resposta
+         //System.out.print("k: "+ k+"-> ");
+         for (int i=0; i<iterations; i++){
+            byte[] dataSend = new byte[k];
 
-         //ToDo: calcular o RTT
-         time = System.currentTimeMillis() -time;
-         System.out.println(time + "millisegundos");
+            long time = System.nanoTime();
+         
+            out.write(dataSend,0,dataSend.length);
+            out.flush();
 
-         System.out.println ("Resposta = " + resp);
+            /////////////////////////
+
+            byte[] data  = new byte[k];
+            int count = in.read(data);
+            byte[] real = new byte[count+1];
+            for(int ii=0;ii<count;ii++)
+               real[ii]=data[ii];
+
+            // Calcular o RTT
+            time = System.nanoTime()-time;
+            rtt[i] = time;
+            //System.out.print(time+",");
+         }
+
+         // Media - descartando as 10 primeiras medidas
+         for (int i=10; i<iterations; i++)
+            media += rtt[i];
+         media = ((double)media)/(iterations-10);
+         lMed = lMed + String.format("%-12.2f ", media);
+
+         // Desvio Padrao - descartando as 10 primeiras medidas
+         for (int i=10; i<iterations; i++)
+            desvioPadrao += Math.pow(rtt[i] - media,2);
+         desvioPadrao = desvioPadrao/(iterations-10);
+         desvioPadrao = Math.sqrt(desvioPadrao);
+         lDvp = lDvp + String.format("%-12.2f ", desvioPadrao);
+
+         //System.out.println("["+k+", "+media+", "+desvioPadrao+"]");
       }
 
-      sock.close(); // fecha socket
+      socket.close(); // fecha socket
+
+      
+      System.out.println(l1);
+      System.out.println(lMed);
+      System.out.println(lDvp);
    }
 }
+
