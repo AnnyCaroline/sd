@@ -8,8 +8,13 @@ public class TCPClient
       String host = args[0];
       int port = Integer.parseInt(args[1]);
       int iterations = Integer.parseInt(args[2]);
-      boolean txt = Boolean.parseBoolean(args[3]); //false:csv true:txt
 
+      boolean csv = false;
+      if (args.length > 3){
+         if (args[3] == "csv")
+            csv = true;
+      }
+      
       ClientWorker cw1 = new ClientWorker(host, port, iterations);
       ClientWorker cw2 = new ClientWorker(host, port, iterations);
       cw1.start();
@@ -26,18 +31,7 @@ public class TCPClient
       String lLower;
       String lUpper;
 
-      if (txt){
-         l1 = String.format("%-12s ", "TCP/2/100");
-         for (int k=1, j=0; j<=16; j++, k=k*2){
-            l1 = l1 + String.format("%-12d ", k);
-         }
-
-         lMed = String.format("%-12s ", "MED");
-         lDvp = String.format("%-12s ", "DVP");     
-         lMed2 = String.format("%-12s ", "MED");
-         lLower = String.format("%-12s ", "LOW");
-         lUpper = String.format("%-12s ", "UPP");
-      }else{
+      if (csv){
          l1 = new String();
          for (int k=1, j=0; j<=16; j++, k=k*2){
             l1 = l1 + String.format("%d;", k);
@@ -48,6 +42,17 @@ public class TCPClient
          lMed2 = new String();
          lLower = new String();
          lUpper = new String();
+      }else{
+         l1 = String.format("%-12s ", "TCP/2/100");
+         for (int k=1, j=0; j<=16; j++, k=k*2){
+            l1 = l1 + String.format("%-12d ", k);
+         }
+
+         lMed = String.format("%-12s ", "MED");
+         lDvp = String.format("%-12s ", "DVP");     
+         lMed2 = String.format("%-12s ", "MED");
+         lLower = String.format("%-12s ", "LOW");
+         lUpper = String.format("%-12s ", "UPP");
       }
 
       for (int k=1, j=0; j<=16; j++, k=k*2){
@@ -63,10 +68,10 @@ public class TCPClient
          media = ((double)media)/(2*(iterations));
 
          // Media - Print 
-         if (txt) 
-            lMed = lMed + String.format("%-12.2f ", media);
-         else
+         if (csv)
             lMed = lMed + String.format("%.2f;", media);
+         else
+            lMed = lMed + String.format("%-12.2f ", media);
 
 
          // Desvio Padrao
@@ -81,10 +86,10 @@ public class TCPClient
          desvioPadrao = Math.sqrt(desvioPadrao);
 
          // Desvio Padrao - print
-         if (txt) 
-            lDvp = lDvp + String.format("%-12.2f ", desvioPadrao);
+         if (csv) 
+            lDvp = lDvp + String.format("%.2f;", desvioPadrao);            
          else
-            lDvp = lDvp + String.format("%.2f;", desvioPadrao);
+            lDvp = lDvp + String.format("%-12.2f ", desvioPadrao);
 
          //Método 2
          //juntando os arrays
@@ -99,17 +104,17 @@ public class TCPClient
          //calculando
          ConfidenceInterval ci = new ConfidenceInterval(rtt, 0.98);
          //média
-         if (txt) 
-            lMed2 = lMed2 + String.format("%-12.2f ", ci.getMean());
+         if (csv) 
+            lMed2 = lMed2 + String.format("%.2f;", ci.getMean());            
          else
-            lMed2 = lMed2 + String.format("%.2f;", ci.getMean());
+            lMed2 = lMed2 + String.format("%-12.2f ", ci.getMean());
          //erros
-         if (txt){
-            lLower = lLower + String.format("%-12.2f ", ci.getLower());
-            lUpper = lUpper + String.format("%-12.2f ", ci.getUpper());
-         }else{
+         if (csv){
             lLower = lLower + String.format("%.2f;", ci.getLower());
             lUpper = lUpper + String.format("%.2f;", ci.getUpper());
+         }else{
+            lLower = lLower + String.format("%-12.2f ", ci.getLower());
+            lUpper = lUpper + String.format("%-12.2f ", ci.getUpper());            
          }
       }     
 

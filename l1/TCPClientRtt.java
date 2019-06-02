@@ -1,10 +1,11 @@
 import java.io.*;
 import java.net.*;
 
+// only csv
+
 public class TCPClientRtt
 {
    public static void main(String args[]) throws Exception{
-
         String host = args[0];
         int port = Integer.parseInt(args[1]);
         int iterations = Integer.parseInt(args[2]);
