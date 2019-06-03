@@ -44,9 +44,6 @@ public class Worker extends Thread
                out.flush();
             }
          }
-
-         Thread.currentThread().sleep(1000);
-         this.socket.close();
       }
       catch (Exception e) {
          System.out.println("   " + color + e + ANSI_RESET);

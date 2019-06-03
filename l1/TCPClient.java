@@ -8,20 +8,33 @@ public class TCPClient
       String host = args[0];
       int port = Integer.parseInt(args[1]);
       int iterations = Integer.parseInt(args[2]);
-
+      int clients = 2;
       boolean csv = false;
-      if (args.length > 3){
-         if (args[3] == "csv")
-            csv = true;
+
+      try{
+         clients = Integer.parseInt(args[3]);
+
+         if (args.length > 4){
+            if (args[4].equals("csv"))
+               csv = true;
+         }
+      }catch(Exception e){
+         if (args.length > 3){
+            if (args[3].equals("csv"))
+               csv = true;
+         }
       }
       
-      ClientWorker cw1 = new ClientWorker(host, port, iterations);
-      ClientWorker cw2 = new ClientWorker(host, port, iterations);
-      cw1.start();
-      cw2.start();
+      ClientWorker cw[]  = new ClientWorker[clients];
 
-      cw1.join();
-      cw2.join();
+      for (int i=0; i<clients; i++){
+         cw[i] = new ClientWorker(host, port, iterations);
+         cw[i].start();
+      }
+
+      for (int i=0; i<clients; i++){
+         cw[i].join();
+      }
 
       String l1;
       String lMed;
@@ -59,11 +72,10 @@ public class TCPClient
          // Media
          double media = 0;      
          
-         for (int i=0; i<iterations; i++){
-            media += cw1.rtt[j][i];
-         }
-         for (int i=0; i<iterations; i++){
-            media += cw2.rtt[j][i];
+         for (int y=0; y<clients; y++){
+            for (int i=0; i<iterations; i++){
+               media += cw[y].rtt[j][i];
+            }
          }
          media = ((double)media)/(2*(iterations));
 
@@ -76,11 +88,10 @@ public class TCPClient
 
          // Desvio Padrao
          double desvioPadrao = 0;
-         for (int i=0; i<iterations; i++){
-            desvioPadrao += Math.pow(cw1.rtt[j][i] - media,2);
-         }
-         for (int i=0; i<iterations; i++){
-            desvioPadrao += Math.pow(cw2.rtt[j][i] - media,2);
+         for (int y=0; y<clients; y++){
+            for (int i=0; i<iterations; i++){
+               desvioPadrao += Math.pow(cw[y].rtt[j][i] - media,2);
+            }
          }
          desvioPadrao = desvioPadrao/(2*(iterations));
          desvioPadrao = Math.sqrt(desvioPadrao);
@@ -95,10 +106,10 @@ public class TCPClient
          //juntando os arrays
          long rtt[] = new long[iterations*2];
          for (int i=0; i<iterations; i++){
-            rtt[i] = cw1.rtt[j][i];
+            rtt[i] = cw[0].rtt[j][i];
          }
          for (int i=0, ii=iterations; i<iterations; i++, ii++){
-            rtt[ii] = cw2.rtt[j][i];
+            rtt[ii] = cw[1].rtt[j][i];
          }
          
          //calculando
