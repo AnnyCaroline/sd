@@ -33,10 +33,10 @@ public class TCPServer {
       System.out.println("Server is listening ...");
 
       // loop: aceita conexao...
-      //       cria Worker pasasndo o socket ativo
-      //       inicia a thread do Worker
+      //       cria ServerWorker pasasndo o socket ativo
+      //       inicia a thread do ServerWorker
       //       volta para aguardar nova conexao
-      Worker w[]  = new Worker[clients];
+      ServerWorker w[]  = new ServerWorker[clients];
 
       try{
          for (int i=1; i<=clients; i++){
@@ -48,7 +48,7 @@ public class TCPServer {
             if (i<=8)
                colorIndex = i-1;
    
-            w[i-1] = new Worker(as, iterations, colors[colorIndex]);
+            w[i-1] = new ServerWorker(as, iterations, colors[colorIndex]);
             w[i-1].start();
    
             if (i<clients)
