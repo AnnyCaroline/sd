@@ -21,7 +21,7 @@ public class TestTCPServer {
          DataInputStream in=new DataInputStream(socket.getInputStream());  
          DataOutputStream out=new DataOutputStream(socket.getOutputStream());
 
-         byte[] data  = new byte[32768];
+         byte[] data  = new byte[1024];
          int count = in.read(data);
 
          byte[] real = new byte[count+1];

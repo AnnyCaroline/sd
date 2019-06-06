@@ -10,13 +10,16 @@ public class TestTCPClient
       
       Socket socket = new Socket(host, port);
 
-      DataInputStream in=new DataInputStream(socket.getInputStream());  
-      DataOutputStream out=new DataOutputStream(socket.getOutputStream());
+      try{
+         DataOutputStream out=new DataOutputStream(socket.getOutputStream());
 
-      int k = 32768;
+         int k = 1024;
 
-      byte[] data = new byte[k];
-      out.write(data,0,data.length);
-      out.flush();
+         byte[] data = new byte[k];
+         out.write(data,0,data.length);
+         out.flush();
+      }finally{
+         socket.close();
+      }
    }
 }
