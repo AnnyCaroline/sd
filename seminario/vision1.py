@@ -1,19 +1,32 @@
 from google.cloud import vision
 from google.oauth2 import service_account
 
-creds = service_account.Credentials.from_service_account_file('./apresentacao.json')
+creds = service_account.Credentials.from_service_account_file('[PATH]')
 
-client = vision.ImageAnnotatorClient(
-    credentials=creds,
-)
+client = vision.ImageAnnotatorClient(credentials=creds)
 
-response = client.label_detection({
-   'source': {'image_uri': 'https://boygeniusreport.files.wordpress.com/2016/11/puppy-dog.jpg?quality=98&strip=all'},
-})
+request = {
+   "image": {
+      "source": {
+         "image_uri": "http://encurtador.com.br/qKZ39"
+      }
+   },    
+   "features": [
+      {
+         "max_results": 2,
+         "type": "LABEL_DETECTION"
+      },
+      {
+         "type": vision.enums.Feature.Type.SAFE_SEARCH_DETECTION
+      }
+   ]
+}
+
+response = client.annotate_image(request)
 
 print(response)
 
-# for label in response.label_annotations:
-#     print(label.description)
+print(response.safe_search_annotation.adult)
 
-# print(len(response.label_annotations));
+for label in response.label_annotations:
+   print(label.description)
